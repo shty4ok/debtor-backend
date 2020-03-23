@@ -15,17 +15,21 @@ app.post('/api/auth', urlencodedParser, (req, res, next) => {
   const user = {
     login: 'admin',
     password: 'admin',
-    token: ''
+    token: '1'
   };
 
   if (req.body.login === user.login && req.body.password === user.password ) {
     jwt.sign( req.body.login, 'KOKO', (err, token)=> {
-      this.user.token = token;
-      console.dir(this.user.token);
-      res.send(token);
+      res.json({
+        status: true,
+        token: token
+      });
     });
   } else {
-    res.send(null);
+    res.json({
+      status: false,
+      message:'Login or password is invalid'
+    });
   }
 });
 app.get('/api/data', (req, res) => {
