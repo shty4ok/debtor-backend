@@ -24,19 +24,30 @@ const user = {
 };
 
 app.use(cors());
+const jwt = require('jsonwebtoken');
 const urlencodedParser = bodyParser.urlencoded({extended: false});
 // support parsing of application/json type post data
 app.use(bodyParser.json());
-
 //support parsing of application/x-www-form-urlencoded post data
 app.use(bodyParser.urlencoded({ extended: true }));
 app.post('/api/auth', urlencodedParser, (req, res, next) => {
-
+  const user = {
+    login: 'admin',
+    password: 'admin',
+  };
 
   if (req.body.login === user.login && req.body.password === user.password ) {
-    res.send(true);
+    jwt.sign( req.body.login, 'KOKO', (err, token)=> {
+      res.json({
+        status: true,
+        token: token
+      });
+    });
   } else {
-    res.send(false);
+    res.json({
+      status: false,
+      message:'Login or password is invalid'
+    });
   }
 });
 app.post('/api/debts', urlencodedParser, (req, res, next) => {
