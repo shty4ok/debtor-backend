@@ -81,11 +81,10 @@ app.get('/api/debts', function (req, res) {
 app.delete('/api/debts/:id', urlencodedParser, (req, res, next) => {
   jwt.verify(req.headers.authorization, jwtsecret, (err, decode) => {
     if (decode.login === user.login) {
-      const newArr = dataArray.find( (obj ) => {
-        return (obj.id !== parseInt(req.params.id));
+      const newArr = dataArray.findIndex( (obj ) => {
+        return (obj.id === parseInt(req.params.id));
       });
-      dataArray.splice([newArr.id]);
-      console.dir(dataArray);
+      dataArray.splice(newArr, 1);
       res.status(204).json(dataArray);
     } else {
       res.status(401).json({
