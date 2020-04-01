@@ -58,7 +58,10 @@ app.post('/api/debts', urlencodedParser, (req, res, next) => {
       dataArray.push(req.body);
       res.status(200).json(req.body);
     } else {
-      res.status(400).end();
+      res.status(401).json({
+        status: false,
+        message:'Login or password is invalid'
+      });
     }
   });
 });
@@ -67,7 +70,10 @@ app.get('/api/debts', function (req, res) {
     if (decode.login === user.login) {
       res.status(200).json(dataArray);
     } else {
-      res.status(404).end();
+      res.status(401).json({
+        status: false,
+        message:'Login or password is invalid'
+      });
     }
   });
 });
@@ -75,13 +81,17 @@ app.get('/api/debts', function (req, res) {
 app.delete('/api/debts/:id', urlencodedParser, (req, res, next) => {
   jwt.verify(req.headers.authorization, jwtsecret, (err, decode) => {
     if (decode.login === user.login) {
-      const newArr = dataArray.filter(( obj ) => {
-        return (obj.id !== JSON.parse(req.params.id));
+      const newArr = dataArray.find( (obj ) => {
+        return (obj.id !== parseInt(req.params.id));
       });
-      dataArray = newArr;
+      dataArray.splice([newArr.id]);
+      console.dir(dataArray);
       res.status(204).json(dataArray);
     } else {
-      res.status(404).end();
+      res.status(401).json({
+        status: false,
+        message:'Login or password is invalid'
+      });
     }
   });
 });
