@@ -39,13 +39,13 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.post('/api/auth', urlencodedParser, (req, res, next) => {
   if (req.body.login === user.login && req.body.password === user.password ) {
     jwt.sign( {login: req.body.login}, jwtsecret, (err, token)=> {
-      res.json({
+      res.status(200).json({
         status: true,
         token: token
       });
     });
   } else {
-    res.json({
+    res.status(401).json({
       status: false,
       message:'Login or password is invalid'
     });
@@ -56,7 +56,7 @@ app.post('/api/debts', urlencodedParser, (req, res, next) => {
   jwt.verify(req.headers.authorization, jwtsecret, (err, decode) => {
     if (decode.login === user.login) {
       dataArray.push(req.body);
-      res.status(201).json(req.body);
+      res.status(200).json(req.body);
     } else {
       res.status(400).end();
     }
@@ -67,14 +67,14 @@ app.get('/api/debts', function (req, res) {
     if (decode.login === user.login) {
       res.status(200).json(dataArray);
     } else {
-      res.status(400).end();
+      res.status(404).end();
     }
   });
 });
 
 app.delete('/api/debts/:id', urlencodedParser, (req, res, next) => {
   const newArr = dataArray.filter(( obj ) => {
-    return obj !== req.body;
+    return obj !== req.params.id;
   });
   dataArray = newArr;
   res.status(204).end();
