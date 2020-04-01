@@ -58,7 +58,7 @@ app.post('/api/debts', urlencodedParser, (req, res, next) => {
       dataArray.push(req.body);
       res.status(200).json(req.body);
     } else {
-      res.status(401).end();
+      res.status(400).end();
     }
   });
 });
@@ -67,7 +67,7 @@ app.get('/api/debts', function (req, res) {
     if (decode.login === user.login) {
       res.status(200).json(dataArray);
     } else {
-      res.status(401).end();
+      res.status(404).end();
     }
   });
 });
@@ -81,10 +81,11 @@ app.delete('/api/debts/:id', urlencodedParser, (req, res, next) => {
       dataArray = newArr;
       res.status(204).json(dataArray);
     } else {
-      res.status(401).end();
+      res.status(404).end();
     }
+  });
 });
 
 app.listen(3000, () => {
   console.log('Server running on port 3000');
-
+});
