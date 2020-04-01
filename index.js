@@ -1,9 +1,11 @@
 const express = require("express");
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const socketIO = require('socket.io');
 const app = express();
+const jwt = require('jsonwebtoken');
+
 const jwtsecret = 'KOKO';
+const urlencodedParser = bodyParser.urlencoded({extended: false});
 
 let dataArray = [{
     id: 1,
@@ -23,23 +25,20 @@ let dataArray = [{
     amount: '1200',
     date: '3-3-33'
   }];
+
 const user = {
   login: 'admin',
-  password: 'admin',
-  token: '1A2b3C4d5E6f7G8h9IAgBKClD'
+  password: 'admin'
 };
-
 app.use(cors());
-const jwt = require('jsonwebtoken');
-const urlencodedParser = bodyParser.urlencoded({extended: false});
 // support parsing of application/json type post data
 app.use(bodyParser.json());
 //support parsing of application/x-www-form-urlencoded post data
 app.use(bodyParser.urlencoded({ extended: true }));
-app.post('/api/auth', urlencodedParser, (req, res, next) => {
 
+app.post('/api/auth', urlencodedParser, (req, res, next) => {
   if (req.body.login === user.login && req.body.password === user.password ) {
-    jwt.sign( req.body.login, jwtsecret, (err, token)=> {
+    jwt.sign( {login: req.body.login}, jwtsecret, (err, token)=> {
       res.json({
         status: true,
         token: token
@@ -52,22 +51,28 @@ app.post('/api/auth', urlencodedParser, (req, res, next) => {
     });
   }
 });
+
 app.post('/api/debts', urlencodedParser, (req, res, next) => {
-  dataArray.push(req.body);
-  res.status(201).json(req.body);
+  jwt.verify(req.headers.authorization, jwtsecret, (err, decode) => {
+    if (decode.login === user.login) {
+      dataArray.push(req.body);
+      res.status(201).json(req.body);
+    } else {
+      res.status(400).end();
+    }
+  });
 });
 app.get('/api/debts', function (req, res) {
-  // jwt.verify(req.headers.authorization, jwtsecret, (err, decode) => {
-  //   console.log(decode);
-  // });
-  if(req.headers.authorization === user.token) {
-    res.json(dataArray);
-  } else {
-    res.end();
-  }
+  jwt.verify(req.headers.authorization, jwtsecret, (err, decode) => {
+    if (decode.login === user.login) {
+      res.status(200).json(dataArray);
+    } else {
+      res.status(400).end();
+    }
+  });
 });
-app.delete('/api/debts/:id', urlencodedParser, (req, res, next) => {
 
+app.delete('/api/debts/:id', urlencodedParser, (req, res, next) => {
   const newArr = dataArray.filter(( obj ) => {
     return obj !== req.body;
   });
